@@ -32,22 +32,54 @@ void RegisterCopy(ulong ticket, ulong origin_ticket) {
    info.origin_ticket = origin_ticket;
    ArrayResize(copies, ArraySize(copies) + 1);
    copies[ArraySize(copies) - 1] = info;
+   Print("[TradeCopierEA] Position copiée: Original=" + IntegerToString(origin_ticket) + ", Copie=" + IntegerToString(ticket));
+}
+
+// Supprime un élément du tableau copies
+void RemoveFromArray(int index) {
+   int size = ArraySize(copies);
+   // Vérifier que l'index est valide
+   if(index < 0 || index >= size) return;
+   
+   // Déplacer les éléments pour combler le trou
+   for(int i = index; i < size - 1; i++) {
+      copies[i] = copies[i + 1];
+   }
+   
+   // Réduire la taille du tableau
+   ArrayResize(copies, size - 1);
 }
 
 // Ferme les copies d'une position
 void CloseCopiesOf(ulong origin_ticket) {
+   Print("[TradeCopierEA] Tentative de fermeture des copies pour l'original: " + IntegerToString(origin_ticket));
    for (int i = ArraySize(copies) - 1; i >= 0; i--) {
       if (copies[i].origin_ticket == origin_ticket) {
          if (PositionSelectByTicket(copies[i].ticket)) {
-            trade.PositionClose(copies[i].ticket);
+            bool success = trade.PositionClose(copies[i].ticket);
+            if(success) {
+               Print("[TradeCopierEA] Position fermée avec succès: Ticket=" + IntegerToString(copies[i].ticket));
+            } else {
+               Print("[TradeCopierEA] ERREUR: Échec fermeture position: Ticket=" + IntegerToString(copies[i].ticket) + ", Code=" + IntegerToString(GetLastError()));
+            }
+         } else {
+            Print("[TradeCopierEA] Position introuvable ou déjà fermée: Ticket=" + IntegerToString(copies[i].ticket));
          }
-         ArrayRemove(copies, i);
+         RemoveFromArray(i);
       }
    }
 }
 
 void OnTick() {
    int total = PositionsTotal();
+   
+   // Log simple pour montrer que l'EA est actif (toutes les 100 ticks)
+   static int tick_counter = 0;
+   tick_counter++;
+   if(tick_counter % 100 == 0) {
+      Print("[TradeCopierEA] Actif - Positions totales: " + IntegerToString(total) + ", Copies suivies: " + IntegerToString(ArraySize(copies)));
+   }
+   
    for (int i = 0; i < total; i++) {
       ulong ticket = PositionGetTicket(i);
       if (ticket == 0) continue;
@@ -79,10 +111,12 @@ void OnTick() {
       for (int j = 0; j < CopyCount; j++) {
          trade.SetExpertMagicNumber(MyMagicNumber);
          bool success = false;
+         string comment = "TC#" + IntegerToString(j+1) + "/" + IntegerToString(CopyCount) + " de " + IntegerToString(ticket);
+         
          if (type == POSITION_TYPE_BUY)
-            success = trade.Buy(copiedLot, symbol, 0, sl, tp, "Copy of " + IntegerToString(ticket));
+            success = trade.Buy(copiedLot, symbol, 0, sl, tp, comment);
          else if (type == POSITION_TYPE_SELL)
-            success = trade.Sell(copiedLot, symbol, 0, sl, tp, "Copy of " + IntegerToString(ticket));
+            success = trade.Sell(copiedLot, symbol, 0, sl, tp, comment);
 
          if (success)
             RegisterCopy(trade.ResultOrder(), ticket);
@@ -92,19 +126,31 @@ void OnTick() {
    }
 
    // Vérifier fermeture du trade d'origine
-   for (int i = ArraySize(copies) - 1; i >= 0; i--) {
-      if (!PositionSelectByTicket(copies[i].origin_ticket)) {
-         // L’original est fermé
-         CloseCopiesOf(copies[i].origin_ticket);
-      } else if (UpdateSLTP && PositionSelectByTicket(copies[i].ticket) && PositionSelectByTicket(copies[i].origin_ticket)) {
-         double origin_sl = PositionGetDouble(POSITION_SL);
-         double origin_tp = PositionGetDouble(POSITION_TP);
+   int copies_size = ArraySize(copies);
+   if(copies_size > 0) {  // Vérifier que le tableau n'est pas vide
+      for (int i = copies_size - 1; i >= 0; i--) {
+         // Vérifier que l'index est toujours valide (la taille peut changer)
+         if(i >= ArraySize(copies)) continue;
+         
+         if (!PositionSelectByTicket(copies[i].origin_ticket)) {
+            // L'original est fermé
+            Print("[TradeCopierEA] Position originale fermée détectée: " + IntegerToString(copies[i].origin_ticket));
+            CloseCopiesOf(copies[i].origin_ticket);
+         } else if (UpdateSLTP && PositionSelectByTicket(copies[i].ticket) && PositionSelectByTicket(copies[i].origin_ticket)) {
+            double origin_sl = PositionGetDouble(POSITION_SL);
+            double origin_tp = PositionGetDouble(POSITION_TP);
 
-         double copy_sl = PositionGetDouble(POSITION_SL);
-         double copy_tp = PositionGetDouble(POSITION_TP);
+            double copy_sl = PositionGetDouble(POSITION_SL);
+            double copy_tp = PositionGetDouble(POSITION_TP);
 
-         if (MathAbs(origin_sl - copy_sl) > _Point || MathAbs(origin_tp - copy_tp) > _Point) {
-            trade.PositionModify(copies[i].ticket, origin_sl, origin_tp);
+            if (MathAbs(origin_sl - copy_sl) > _Point || MathAbs(origin_tp - copy_tp) > _Point) {
+               bool success = trade.PositionModify(copies[i].ticket, origin_sl, origin_tp);
+               if(success) {
+                  Print("[TradeCopierEA] SL/TP mis à jour: Ticket=" + IntegerToString(copies[i].ticket));
+               } else {
+                  Print("[TradeCopierEA] ERREUR: Échec mise à jour SL/TP: Ticket=" + IntegerToString(copies[i].ticket) + ", Code=" + IntegerToString(GetLastError()));
+               }
+            }
          }
       }
    }

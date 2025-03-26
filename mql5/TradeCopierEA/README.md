@@ -73,7 +73,7 @@ Si tu ouvres un trade de **0.10 lot BUY EURUSD** à la main, avec un SL et un TP
 
 ## 🔽 Télécharger l'EA
 
-👉 [Télécharger TradeCopierEA.mq5](https://tonlien.exemple.com/TradeCopierEA.mq5)
+👉 [Télécharger TradeCopierEA.mq5](https://github.com/GerardFevill/mql-experts/tree/main/mql5/TradeCopierEA/TradeCopierEA.mq5)
 
 > Remplace ce lien par l’URL réelle vers ton fichier `.mq5`
 
