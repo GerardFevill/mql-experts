@@ -77,11 +77,12 @@ void OnTick() {
       double copiedLot = UseLotRatio ? volume * LotRatio : FixedLot;
 
       for (int j = 0; j < CopyCount; j++) {
+         trade.SetExpertMagicNumber(MyMagicNumber);
          bool success = false;
          if (type == POSITION_TYPE_BUY)
-            success = trade.Buy(copiedLot, symbol, 0, sl, tp, "Copy of " + IntegerToString(ticket), MyMagicNumber);
+            success = trade.Buy(copiedLot, symbol, 0, sl, tp, "Copy of " + IntegerToString(ticket));
          else if (type == POSITION_TYPE_SELL)
-            success = trade.Sell(copiedLot, symbol, 0, sl, tp, "Copy of " + IntegerToString(ticket), MyMagicNumber);
+            success = trade.Sell(copiedLot, symbol, 0, sl, tp, "Copy of " + IntegerToString(ticket));
 
          if (success)
             RegisterCopy(trade.ResultOrder(), ticket);

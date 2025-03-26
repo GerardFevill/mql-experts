@@ -1,0 +1,37 @@
+# Fichiers compilés MQL5
+*.ex5
+*.ex4
+
+# Fichiers de logs
+*.log
+
+# Fichiers temporaires
+*.tmp
+
+# Fichiers de sauvegarde
+*.bak
+
+# Fichiers de configuration spécifiques à l'utilisateur
+*.set
+
+# Dossiers générés
+logs/
+files/
+MQL5/Experts/files/
+MQL5/Experts/logs/
+
+# Fichiers de projet Visual Studio
+*.suo
+*.user
+*.sln.docstates
+.vs/
+
+# Fichiers de cache
+__history/
+__recovery/
+
+# Autres fichiers spécifiques à MetaTrader
+*.dll
+*.exp
+*.lib
+*.pdb
