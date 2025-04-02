@@ -1,5 +1,10 @@
 aws_region  = "eu-west-2"  # Londres
-windows_ami = "ami-0d3c032f5934e1b41"  # Windows Server 2019 Base pour eu-west-2 (mise à jour)
+windows_ami = "ami-0d3c032f5934e1b41"  # Windows Server 2019 Base pour eu-west-2
 instance_type = "t3.micro"
-key_name    = "mt5-key"  # Créez cette paire de clés dans la console AWS si elle n'existe pas
-allowed_ip  = "123.123.123.123/32"  # Remplacez par votre adresse IP publique pour sécuriser l'accès RDP
+key_name    = "mt5-key"  # Nom de la paire de clés AWS
+allowed_ip  = "123.123.123.123/32"  # Votre adresse IP publique au format CIDR
+
+# Informations de connexion MetaTrader 5
+mt5_login   = "12345678"  # Votre identifiant MT5
+mt5_password = "votre_mot_de_passe_secret"  # Sera stocké dans AWS Secrets Manager
+mt5_server  = "MetaQuotes-Demo"  # Serveur MT5, ex: "ICMarkets-Live", "FXCM-Demo", etc.

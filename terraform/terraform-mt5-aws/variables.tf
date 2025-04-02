@@ -28,3 +28,20 @@ variable "allowed_ip" {
   type        = string
   default     = "0.0.0.0/0"  # Par défaut, toutes les IPs - à restreindre en production
 }
+
+# Variables pour MetaTrader 5
+variable "mt5_login" {
+  description = "Identifiant de connexion MetaTrader 5"
+  type        = string
+}
+
+variable "mt5_password" {
+  description = "Mot de passe MetaTrader 5 (sera stocké dans AWS Secrets Manager)"
+  type        = string
+  sensitive   = true
+}
+
+variable "mt5_server" {
+  description = "Serveur MetaTrader 5 (ex: ICMarkets-Live, FXCM-Demo, etc.)"
+  type        = string
+}
