@@ -45,3 +45,11 @@ variable "mt5_server" {
   description = "Serveur MetaTrader 5 (ex: ICMarkets-Live, FXCM-Demo, etc.)"
   type        = string
 }
+
+variable "environment" {
+  description = "Environnement de déploiement (ex: dev, staging, prod)"
+  type        = string
+  default     = "dev"
+}
+
+

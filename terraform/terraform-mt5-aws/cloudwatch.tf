@@ -31,10 +31,10 @@ resource "aws_iam_role" "mt5_cloudwatch_role" {
   }
 }
 
-# Politique permettant d'envoyer des logs à CloudWatch
+# Politique permettant d'envoyer des logs à CloudWatch, d'accéder à S3 et à Secrets Manager
 resource "aws_iam_policy" "mt5_cloudwatch_policy" {
   name        = "mt5-cloudwatch-policy"
-  description = "Permet d'envoyer des logs à CloudWatch"
+  description = "Permet d'envoyer des logs à CloudWatch, d'accéder à S3 et à Secrets Manager"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -54,6 +54,25 @@ resource "aws_iam_policy" "mt5_cloudwatch_policy" {
         Effect   = "Allow"
         Resource = "*"
       },
+      {
+        Action = [
+          "s3:GetObject",
+          "s3:ListBucket"
+        ]
+        Effect   = "Allow"
+        Resource = [
+          "arn:aws:s3:::ea-trading-bucket",
+          "arn:aws:s3:::ea-trading-bucket/*"
+        ]
+      },
+      {
+        Action = [
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:ListSecrets"
+        ]
+        Effect   = "Allow"
+        Resource = "*"
+      }
     ]
   })
 }

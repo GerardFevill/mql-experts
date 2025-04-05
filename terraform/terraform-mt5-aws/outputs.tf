@@ -19,6 +19,12 @@ output "cloudwatch_log_group" {
   description = "Nom du groupe de logs CloudWatch pour l'instance MT5"
 }
 
+# Commande pour déployer les scripts sur l'instance
+output "deploy_command" {
+  description = "Commande pour déployer les scripts sur l'instance"
+  value       = "powershell -ExecutionPolicy Bypass -File .\\scripts\\utils\\deploy-to-instance.ps1 -InstanceId ${aws_instance.mt5_instance.id} -PublicIp ${aws_eip.mt5_eip.public_ip} -KeyPath .\\keys\\mt5-key.pem"
+}
+
 # URL de la console CloudWatch pour accéder aux logs
 output "cloudwatch_logs_console_url" {
   value       = "https://${var.aws_region}.console.aws.amazon.com/cloudwatch/home?region=${var.aws_region}#logsV2:log-groups/log-group/${replace(aws_cloudwatch_log_group.mt5_logs.name, "/", "$252F")}"
